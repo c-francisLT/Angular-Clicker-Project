@@ -1,8 +1,8 @@
 import { Component, signal } from "@angular/core";
-import { Enemy } from "./enemy.component";
+import { EnemyComponent } from "./enemy.component";
 
 @Component({
-    imports: [Enemy],
+    imports: [EnemyComponent],
     selector: 'clicker-check',
     template: `
     <enemy [health]="enemyHealth"></enemy>
