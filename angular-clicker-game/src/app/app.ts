@@ -5,7 +5,7 @@ import { Clicker } from './clicker.component';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, Clicker],
-  templateUrl: './app.html',
+  template: "<clicker-check></clicker-check>",
   styleUrl: './app.css'
 })
 export class App {
