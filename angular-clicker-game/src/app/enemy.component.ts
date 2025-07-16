@@ -1,4 +1,4 @@
-import { Component, HostBinding ,EventEmitter, signal, Input, OnInit, OnDestroy, ChangeDetectorRef } from "@angular/core";
+import { Component, HostBinding ,EventEmitter, signal, Input, OnInit, OnDestroy, ChangeDetectorRef, effect } from "@angular/core";
 import { ENEMY_ANIM, enemyTypes } from "../utils/enemyType";
 import { getRandomEnemy } from "../utils/componentFunctions";
 
@@ -48,7 +48,13 @@ export class EnemyComponent implements OnInit, OnDestroy {
     intervalId: any;
     animationSpeed = 0
 
-    constructor(private cdr: ChangeDetectorRef) {this.initializeEnemy();}
+    constructor(private cdr: ChangeDetectorRef) {this.initializeEnemy()
+      effect(()=>{
+        if(this.Health() <= 0){
+          setTimeout(()=>this.newEnemy(), 1000)
+        }
+      })
+    }
 
     private initializeEnemy() {
       this.Health.set(this.currentEnemy.health);
@@ -65,6 +71,16 @@ export class EnemyComponent implements OnInit, OnDestroy {
       }
   }
 
+  private newEnemy() {
+    if (this.Health() <= 0) {
+        this.currentEnemy = getRandomEnemy(enemyTypes);
+        this.Health.set(this.currentEnemy.health);
+        this.setAnimationFrames();
+        this.healthChange.emit(this.currentEnemy.health);
+        this.isDamaged = false;
+        this.cdr.detectChanges();
+    }
+}
   private setAnimationFrames() {
       const enemyType:string = this.currentEnemy.type;
       
