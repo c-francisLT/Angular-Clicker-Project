@@ -1,52 +1,21 @@
-import { Component, signal, Input, OnInit, OnDestroy, ChangeDetectorRef } from "@angular/core";
-import { Enemy, enemyTypes } from "../utils/enemyType";
+import { Component, HostBinding ,EventEmitter, signal, Input, OnInit, OnDestroy, ChangeDetectorRef } from "@angular/core";
+import { ENEMY_ANIM, enemyTypes } from "../utils/enemyType";
 import { getRandomEnemy } from "../utils/componentFunctions";
 
-const ENEMY_ANIM: { [key: string]: { folder: string; frameCount: number; framePrefix: string; extension: string; speed: number} }= {
-  Bee: {
-    folder: 'Bee',
-    frameCount: 8,
-    framePrefix: 'alien-enemy-flying',
-    extension: '.png',
-    speed: 50
-  },
 
-  Wolf: {
-    folder: 'Wolf',
-    frameCount: 6,
-    framePrefix: 'werewolf-run',
-    extension: '.png',
-    speed: 90,
-  },
-
-  Machine: {
-    folder: 'Machine',
-    frameCount: 7,
-    framePrefix: 'bipedal-unit',
-    extension: '.png',
-    speed: 200,
-  },
-
-  Ghost: {
-    folder: "Ghost",
-    frameCount: 4,
-    framePrefix: "frame",
-    extension: '.png',
-    speed: 100
-  }
-
-}
 @Component({
     selector: 'enemy',
+    styleUrl: './enemy.component.css',
     template: `
     <img [src]="currentFrame" alt="Enemy sprite">
     <p> Health: {{Health()}} </p>
-    `
+    `,
+    outputs: ['healthChange']
 })
 
 export class EnemyComponent implements OnInit, OnDestroy {
     @Input() set health(value: number) {
-        this.Health.set(value);
+        this.Health.set(value)
       }
     
     @Input() set enemyType(value: string){
@@ -54,8 +23,23 @@ export class EnemyComponent implements OnInit, OnDestroy {
         this.setEnemyType(value)
       }
     }
-    Health = signal(100);
 
+    @HostBinding('class.low-health') get isLowHealth() {
+      return this.Health() < 30;
+    }
+    
+    @HostBinding('class.damaged') isDamaged = false;
+    
+    @HostBinding('class.defeated') get isDefeated() {
+      return this.Health() <= 0;
+    }
+    
+    takeDamage() {
+      this.isDamaged = true;
+      setTimeout(() => this.isDamaged = false, 500);
+    }
+    Health = signal(100);
+    healthChange = new EventEmitter<number>()
   
     currentEnemy = getRandomEnemy(enemyTypes)
     frames: string[] = [];
@@ -72,12 +56,12 @@ export class EnemyComponent implements OnInit, OnDestroy {
   }
 
   private setEnemyType(type: string) {
-      // Find the enemy type from enemyTypes array
       const enemyTemplate = enemyTypes.find(e => e.type.toLowerCase() === type.toLowerCase());
       if (enemyTemplate) {
           this.currentEnemy = { ...enemyTemplate };
           this.Health.set(this.currentEnemy.health);
           this.setAnimationFrames();
+          this.healthChange.emit(this.currentEnemy.health)
       }
   }
 
