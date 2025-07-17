@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: write
@@ -14,37 +14,37 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '22'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Build
-      run: npm run build -- --configuration production --base-href "https://cfrancis-lt.github.io/Angular-Clicker-Project/"
-    
-    - name: Prepare deployment files
-      run: |
-        echo "Contents of dist/angular-clicker-game:"
-        ls -la dist/angular-clicker-game/
-        
-        if [ -d "dist/angular-clicker-game/browser" ]; then
-          echo "Found browser folder, moving contents..."
-          cp -r dist/angular-clicker-game/browser/* dist/angular-clicker-game/
-          rm -rf dist/angular-clicker-game/browser
-          rm -rf dist/angular-clicker-game/server
-        fi
-        
-        
-        echo "Final contents for deployment:"
-        ls -la dist/angular-clicker-game/
-      
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist/angular-clicker-game
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build -- --configuration production --base-href "https://c-francisLT.github.io/Angular-Clicker-Project/"
+
+      - name: Prepare deployment files
+        run: |
+          echo "Contents of dist/angular-clicker-game:"
+          ls -la dist/angular-clicker-game/
+
+          if [ -d "dist/angular-clicker-game/browser" ]; then
+            echo "Found browser folder, moving contents..."
+            cp -r dist/angular-clicker-game/browser/* dist/angular-clicker-game/
+            rm -rf dist/angular-clicker-game/browser
+            rm -rf dist/angular-clicker-game/server
+          fi
+
+
+          echo "Final contents for deployment:"
+          ls -la dist/angular-clicker-game/
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/angular-clicker-game
