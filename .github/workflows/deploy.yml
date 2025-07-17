@@ -5,6 +5,11 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -21,6 +26,22 @@ jobs:
       
     - name: Build
       run: npm run build -- --configuration production --base-href "https://cfrancis-lt.github.io/Angular-Clicker-Project/"
+    
+    - name: Prepare deployment files
+      run: |
+        echo "Contents of dist/angular-clicker-game:"
+        ls -la dist/angular-clicker-game/
+        
+        if [ -d "dist/angular-clicker-game/browser" ]; then
+          echo "Found browser folder, moving contents..."
+          cp -r dist/angular-clicker-game/browser/* dist/angular-clicker-game/
+          rm -rf dist/angular-clicker-game/browser
+          rm -rf dist/angular-clicker-game/server
+        fi
+        
+        
+        echo "Final contents for deployment:"
+        ls -la dist/angular-clicker-game/
       
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
