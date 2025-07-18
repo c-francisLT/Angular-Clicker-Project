@@ -1,5 +1,5 @@
-import { WritableSignal, EventEmitter, ChangeDetectorRef } from "@angular/core";
-import { Enemy, enemyTypes, ENEMY_ANIM, AnimationState} from "./enemyType";
+import {ChangeDetectorRef } from "@angular/core";
+import { Enemy, ENEMY_ANIM, AnimationState} from "./enemyType";
 
 export function getRandomEnemy(enemyTypes: Enemy[]) {
     const randomIndex = Math.floor(Math.random() * enemyTypes.length);
