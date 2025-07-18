@@ -14,7 +14,7 @@ import { EnemyComponent } from "./enemy.component";
     `
 })
 export class Clicker {
-    enemyHealth = 0
+    enemyHealth: number = 0
 
     onHealthChange(newHealth: number) {
         this.enemyHealth = newHealth
