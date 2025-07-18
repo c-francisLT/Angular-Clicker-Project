@@ -1,13 +1,13 @@
 import { Component, HostBinding ,EventEmitter, signal, Input, OnInit, OnDestroy, ChangeDetectorRef, effect } from "@angular/core";
-import { ENEMY_ANIM, enemyTypes } from "../utils/enemyType";
-import { getRandomEnemy } from "../utils/componentFunctions";
+import { ENEMY_ANIM, AnimationState, enemyTypes } from "../utils/enemyType";
+import { getRandomEnemy,  setAnimationFrames, startAnimation } from "../utils/componentFunctions";
 
 
 @Component({
     selector: 'enemy',
     styleUrl: './enemy.component.css',
     template: `
-    <img [src]="currentFrame" alt="Enemy sprite">
+    <img [src]="animationState.currentFrame" alt="Enemy sprite">
     <p> Health: {{Health()}} </p>
     `,
     outputs: ['healthChange']
@@ -27,7 +27,7 @@ export class EnemyComponent implements OnInit, OnDestroy {
     @HostBinding('class.low-health') get isLowHealth() {
       return this.Health() < 30;
     }
-    
+    //Fix IsDamaged to return boolean
     @HostBinding('class.damaged') isDamaged = false;
     
     @HostBinding('class.defeated') get isDefeated() {
@@ -42,11 +42,13 @@ export class EnemyComponent implements OnInit, OnDestroy {
     healthChange = new EventEmitter<number>()
   
     currentEnemy = getRandomEnemy(enemyTypes)
-    frames: string[] = [];
-    currentFrame: string = '';
-    frameIndex = 0;
-    intervalId: any;
-    animationSpeed = 0
+    animationState: AnimationState = 
+      {frames: [],
+      currentFrame: '',
+      frameIndex : 0,
+      intervalId: 0,
+      }
+    
 
     constructor(private cdr: ChangeDetectorRef) {this.initializeEnemy()
       effect(()=>{
@@ -58,15 +60,14 @@ export class EnemyComponent implements OnInit, OnDestroy {
 
     private initializeEnemy() {
       this.Health.set(this.currentEnemy.health);
-      this.setAnimationFrames();
+      setAnimationFrames(this.currentEnemy, this.animationState, this.cdr);
   }
-
   private setEnemyType(type: string) {
       const enemyTemplate = enemyTypes.find(e => e.type.toLowerCase() === type.toLowerCase());
       if (enemyTemplate) {
           this.currentEnemy = { ...enemyTemplate };
           this.Health.set(this.currentEnemy.health);
-          this.setAnimationFrames();
+          setAnimationFrames(this.currentEnemy, this.animationState, this.cdr);
           this.healthChange.emit(this.currentEnemy.health)
       }
   }
@@ -75,50 +76,20 @@ export class EnemyComponent implements OnInit, OnDestroy {
     if (this.Health() <= 0) {
         this.currentEnemy = getRandomEnemy(enemyTypes);
         this.Health.set(this.currentEnemy.health);
-        this.setAnimationFrames();
+        setAnimationFrames(this.currentEnemy, this.animationState, this.cdr);
         this.healthChange.emit(this.currentEnemy.health);
         this.isDamaged = false;
         this.cdr.detectChanges();
     }
 }
-  private setAnimationFrames() {
-      const enemyType:string = this.currentEnemy.type;
-      
-      const animConfig = ENEMY_ANIM[enemyType] || ENEMY_ANIM['Bee'];
-      
-      this.frames = this.generateFramePaths(animConfig);
-      this.animationSpeed = animConfig.speed;
-      
-      this.frameIndex = 0;
-      this.currentFrame = this.frames[0];
-      
-      if (this.intervalId) {
-          clearInterval(this.intervalId);
-          this.startAnimation();
-      }
-  }
 
-  private generateFramePaths(config: any): string[] {
-      const frames: string[] = [];
-      for (let i = 1; i <= config.frameCount; i++) {
-          // Generate path
-          const framePath = `${config.folder}/${config.framePrefix}${i}${config.extension}`;
-          frames.push(framePath);
-      }
-      return frames;
-  }
-  private startAnimation() {
-      this.intervalId = setInterval(() => {
-          this.frameIndex = (this.frameIndex + 1) % this.frames.length;
-          this.currentFrame = this.frames[this.frameIndex];
-          this.cdr.detectChanges();
-      }, this.animationSpeed);
-  }
+
+
   ngOnInit() {
-    this.startAnimation();
+    startAnimation(this.animationState, ENEMY_ANIM[this.currentEnemy.type].speed, this.cdr);
 }
 
   ngOnDestroy() {
-    clearInterval(this.intervalId);
+    clearInterval(this.animationState.intervalId);
 }
   }

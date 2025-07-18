@@ -3,14 +3,19 @@ export type Enemy = {
     health: number;
     type: string;
   }
-
+export type AnimationState = {
+  frames: string[],
+  frameIndex: number,
+  currentFrame: string,
+  intervalId: number |  ReturnType<typeof setInterval>
+}
 export const enemyTypes: Enemy[] = [
         {type: "Bee", health: 60},
         {type: "Ghost", health: 100},
         {type: "Machine", health: 150},
         {type: "Wolf", health: 80},
       ]
-      export const ENEMY_ANIM: { [key: string]: { folder: string; frameCount: number; framePrefix: string; extension: string; speed: number} }= {
+export const ENEMY_ANIM: { [key: string]: { folder: string; frameCount: number; framePrefix: string; extension: string; speed: number} }= {
         Bee: {
           folder: 'Bee',
           frameCount: 8,
