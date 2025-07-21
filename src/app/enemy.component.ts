@@ -27,17 +27,24 @@ export class EnemyComponent implements OnInit, OnDestroy {
     @HostBinding('class.low-health') get isLowHealth() {
       return this.Health() < 30;
     }
-    //Fix IsDamaged to return boolean
-    @HostBinding('class.damaged') isDamaged = false;
+    
+    private _isDamaged = signal(false);
+    @HostBinding('class.damaged') get isDamaged() {
+      return this._isDamaged();
+    }
+
+    takeDamage() {
+      this._isDamaged.set(true);
+      setTimeout(() => {
+        this._isDamaged.set(false);
+      }, 500);
+    }
     
     @HostBinding('class.defeated') get isDefeated() {
       return this.Health() <= 0;
     }
     
-    takeDamage() {
-      this.isDamaged = true;
-      setTimeout(() => this.isDamaged = false, 500);
-    }
+
     Health = signal(100);
     healthChange = new EventEmitter<number>()
   
@@ -78,7 +85,7 @@ export class EnemyComponent implements OnInit, OnDestroy {
         this.Health.set(this.currentEnemy.health);
         setAnimationFrames(this.currentEnemy, this.animationState, this.cdr);
         this.healthChange.emit(this.currentEnemy.health);
-        this.isDamaged = false;
+        this._isDamaged.set(false)
         this.cdr.detectChanges();
     }
 }

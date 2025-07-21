@@ -27,5 +27,7 @@ export class Clicker {
         enemyComponent.healthChange.emit(newHealth);
         
         this.enemyHealth = newHealth;
+
+        enemyComponent.takeDamage()
     }
 }
